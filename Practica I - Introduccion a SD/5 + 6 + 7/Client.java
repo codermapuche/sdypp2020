@@ -60,13 +60,26 @@ public class Client {
       System.out.println("B: " + intsJoin(numsb, " "));               
 
       System.out.println("============ #7 ============");  
-      TaskRandom random = new TaskRandom();
-      random.setMin(100);
-      random.setMax(200);
-      server.doTask(random);
-      System.out.println("Resultado: " + random.getVal());       
+      Tarea1 random1 = new Tarea1();
+      random1.setMin(100);
+      random1.setMax(200);
+      server.doTask(random1);
+      System.out.println("Resultado: " + random1.getVal());       
       System.out.println("============================");  
-      
+
+      Tarea2 random2 = new Tarea2();
+      random2.setMin(10);
+      random2.setMax(20);
+      server.doTask(random2);
+      System.out.println("Resultado: " + random2.getVal());       
+      System.out.println("============================");  
+
+      Tarea3 random3 = new Tarea3();
+      random3.setMin(40);
+      random3.setMax(60);
+      server.doTask(random3);
+      System.out.println("Resultado: " + random3.getVal());       
+      System.out.println("============================");  
     } catch (Exception e) {
       e.printStackTrace();
     }

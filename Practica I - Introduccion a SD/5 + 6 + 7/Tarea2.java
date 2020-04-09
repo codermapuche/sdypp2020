@@ -1,11 +1,10 @@
 package sdypp;
 
-
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Random;
 
-public class TaskRandom extends UnicastRemoteObject implements Task {
+public class Tarea2 extends UnicastRemoteObject implements Tarea {
 
   private static final long serialVersionUID = 1L;
   
@@ -13,7 +12,7 @@ public class TaskRandom extends UnicastRemoteObject implements Task {
   protected int max;
   protected int val;
 
-  protected TaskRandom() throws RemoteException {
+  protected Tarea2() throws RemoteException {
     super();
   }
   

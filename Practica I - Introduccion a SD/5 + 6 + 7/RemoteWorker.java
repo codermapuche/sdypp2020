@@ -14,5 +14,5 @@ public interface RemoteWorker extends Remote {
   public ArrayList<Integer> doSub(ArrayList<Integer> numsa, ArrayList<Integer> numsb) throws RemoteException;
   
   // #7
-  public void doTask(Task task) throws RemoteException;
+  public void doTask(Tarea task) throws RemoteException;
 }

@@ -85,7 +85,7 @@ public class Worker implements Runnable {
 			
 			cli.close();
 		} catch (IOException e) {
-      e.printStackTrace();
+      System.out.println("Client closed."); 
     }		
 	}
 

@@ -91,9 +91,9 @@ public class Worker extends UnicastRemoteObject implements RemoteWorker {
   }
   
   // #7
-  public void doTask(Task task) throws RemoteException {
+  public void doTask(Tarea task) throws RemoteException {
     System.out.println("Oka!");
-    task.run();    
+    task.run();
     //Thread tsk = new Thread(task);
     //tsk.start();  
   }
