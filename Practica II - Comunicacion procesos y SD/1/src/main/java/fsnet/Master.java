@@ -38,7 +38,13 @@ public class Master extends Node {
 
       System.out.println("# FileSharingNetwork <Master>");
       System.out.println("## Type <help> for help.");
-            
+
+      try {
+        runIn("master", "replicate", index.toArray(new String[index.size()]), Network._ALL_);
+      } catch (Exception e) {
+        //System.out.println(e.getMessage());  
+      }
+      
       while ( !cmd.equals("exit") ) {
 
         System.out.print("\n> ");
@@ -97,13 +103,12 @@ public class Master extends Node {
             break;
             
           case "replicate":
-            if (opts.length != 2) {
+            if (opts.length != 1) {
               System.out.println("Sintaxis invalida.");
               continue;
             }
             
-            try {          
-              System.out.print(String.join("@", index.toArray(new String[index.size()])));   
+            try { 
               runIn("master", "replicate", index.toArray(new String[index.size()]), Network._ALL_);    
             } catch(Exception e) {
               System.out.println(e.getMessage());              
@@ -125,10 +130,22 @@ public class Master extends Node {
   private void parseMaster(String source, String task, String[] args) {
     
     switch (task) {      
-      case "replicate":        
+      case "replicate": 
+        Boolean rereplicate = args.length != index.size();
         for (int idx = 0; idx < args.length; idx++) {
+          if (!index.contains(args[idx])) {
+            rereplicate = true;
+          }
           index.add(args[idx]);
-        }      
+        }     
+        
+        if (rereplicate) {
+          try {
+            runIn("master", "replicate", index.toArray(new String[index.size()]), Network._ALL_);
+          } catch (Exception e) {
+            System.out.println(e.getMessage());  
+          }            
+        }
       break;
       
       default:

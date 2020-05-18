@@ -1,6 +1,6 @@
 # Trabajopráctico N° 2
 
-1. Desarrolle una red P2P de carga, búsqueda y descarga de archivos.
+#1. Desarrolle una red P2P de carga, búsqueda y descarga de archivos.
 
 Para el desarrollo de este primer punto, se opto por tomar un enfoque mas generico, pensando en reutilizar parte de este desarrollo en futuros puntos e incluso en el TP final.
 
@@ -76,3 +76,62 @@ Aca tambien se podria implementar que cuando se descubra un nuevo nodo master, s
 No hay mucho mas en el master mas alla de algun detalle minimo del protocolo de implementacion que es irrelevante mencionar.
 
 Dado que este desarrollo servira como base para el punto 3, se propone considerarlo como base para una propuesta de TP final.
+
+#2 Proceso de depositos/extracciones en banco.
+
+Para desarrollar este punto, se utilizo la base creada anteriormente y los conceptos teoricos vistos en clase, se realizo una ampliacion de los requisitos para ofrecer un proceso de sincronizacion distribuida, implementando un mecanismo de tokens para lograr los bloqueos.
+
+Se utilizo como base el paquete p2p antes explicado, y se crearon dos tipos de nodos:
+
+### Management
+
+Esta clase hereda de p2p.Node y representa un nodo bancario centralizado, es quien almacena de forma centralizada los saldos de las cuentas y distribuye los tokens de acceso a los clientes.
+
+Luego de iniciado, admite el comando "status" el cual listara todas las cuentas, sus saldos actuales y los tokens asociados en caso de corresponder.
+La comunicacion interna con los clientes se basa en los siguientes mensajes:
+1. createAccount: Este mensaje lo envia el cliente para crear una cuenta nueva, la cual se inicializa con saldo=0 y token=null.
+2. getAccount: Este mensaje lo envia un cliente cuando quiere bloquear una cuenta de forma distribuida, si la cuenta no tiene un token valido previo, se crea uno valido por 30 segundos y se le envia al cliente.
+3. writeAccount: Este mensaje lo envia el cliente para escribir el saldo de una cuenta, dicho mensaje contiene un token asociado a la cuenta el cual debe ser igual al token informado.
+4. leaveAccount: Este mensaje lo envia el cliente para informar que ya no necesita el token y libera al acceso a otros clientes, si el cliente no envia este mensaje, el token se invalida solo a los 30 segundos.
+
+### Client
+
+Esta clase hereda de p2p.Node y representa a un cliente del banco.
+
+Esta clase, admite los comandos "crear", "depositar" y "retirar", los cuales interactuan con los metodos del Management antes mencionados.
+Cabe destacar, que a fines practicos, los comando "depositar" y "retirar" admiten como parametro un delay expresado en segundos, que introducen un delay en la ejecucion intencional, el cual debe ser menor a 30 segundos, que tiene como objetivo demorar la liberacion del token para poder observar en el Management como se crea el token (mediante "status") y dar tiempo a crear otro cliente que quiera modificar la misma cuenta y ver que es rechazado porque la cuenta se encuntra en uso actualmente.
+
+#3 Red elastica de servicios.
+
+Para desarrollar este punto, se utilizo la base creada anteriormente y los conceptos teoricos vistos en clase, ademas se realizo una mejora en la red p2p permitiendo el mecanismo de ejecucion _ROUND_ROBIN_ con el objetivo de balancear la ejecucion de procesos entre los Workers disponibles.
+Se utilizo como base el paquete p2p antes explicado, y se crearon tres tipos de nodos:
+
+### Worker
+
+Esta clase hereda de p2p.Node y representa un nodo trabajador que resuelve una tarea generica, a fines meramente practicos, la tarea solo consiste en esperar un tiempo recibido como parametro.
+Los nodos Worker son instanciados de forma automatica por los nodos "Balancer", cuando un Worker se instancia pueden realizar dos acciones:
+
+1. resolve: Mediante este comando recibe una tarea y la resuelve, al iniciar incrementa la carga y al final la disminuye.
+2. leave: Mediante este comando el balanceador le indica que cuando termine lo que esta haciendo se suicide porque sus servicios ya no son requeridos.
+
+### Balancer
+
+Esta clase hereda de p2p.Node y representa a un balanceador, recibe tareas de los clientes y gestiona los workers necesarios para llevarlas adelante, si la cantidad de tareas supera los umbrales, crea nuevos workers bajo demanda, si no hay workers disponibles, bufferea la tarea y reintenta ejecutarla automaticamente sin que el cliente se entere siendo esto transparente para el.
+
+### Client
+
+Esta clase hereda de p2p.Node y representa a un cliente, basicamente admite un unico comando "fire" el cual inicia un lote de tareas que tienen una duracion parametrizable.
+
+Para probar este punto, se debe crear una instancia de Balancer y uno o mas Client, luego en cada cliente ejecutar el comando "fire" con los argumentos correspondientes, internamente se hara todo de forma automatica, si se ponen timers lo sufientemente grandes, daran tiempo a ir a la consola del balancer y ejecutar el comando "status" para ver la cantidad de workers y tareas actuales en ejecucion.
+
+#4 Operador de sobel.
+
+Para este punto, se utilizo el codigo base del punto anterior haciendo modificaciones particulares, por ejemplo en el cliente se implementaron los metodos "localsobel" y "remotesobel" donde el primero realiza el procesamiento en el cliente y el segundo envia la tarea al balanceador.
+En el balanceador se implemento el mecanismo necesario para fragmentar una tarea de sobel en multiples subtareas y delegarlas a los workers, los cuales siguen funcionando de forma eleastica.
+En los workers se implento el codigo necesario para realizar el operador de sobel.
+
+En las pruebas,con una imagen de 4000x2666 se observan los siguientes resultados:
+Local: 10573ms
+Remoto: 80573ms
+La razon de que remoto tarde 8 veces mas que en local, se debe a que la mayor parte del tiempo se pierde creando nuevos hilos y allocando procesos, en total, se crearon 14 procesos con 1080 hilos, si los workers estuvieran en equipos distintos o si la tarea a realizar requiriera mas procesamiento se notaria una mejora.
+Un detalle es que cuando se rearma la imagen, se puede observar una linea entre cada parte, esto sirve para identificar por donde se realizo la fragmentacion de tareas, en total hay 1080 fragmentos en la imagen de ejemplo.

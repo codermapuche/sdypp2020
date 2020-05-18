@@ -1,7 +1,7 @@
 package p2p;
 
-import java.io.BufferedWriter;
-import java.io.OutputStreamWriter;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -16,12 +16,16 @@ import java.util.Vector;
 public class Network implements Runnable {
   private static final int _UDP_READ_ = 1;  
   
-  public static final int _FIRST_ = 1;  
-  public static final int _ALL_ = 2;  
+  public static final int _FIRST_       = 1;  
+  public static final int _ALL_         = 2;  
+  public static final int _ROUND_ROBIN_ = 3;
+  static final String _SEP_             = "%";  
+  static final String _SPLIT_           = "\n";
   
   private String _addr;
   private String _name;
   private int _port;
+  private int _rr = 0;
 
   private Vector<Integer> threads = new Vector<Integer>();
   private Hashtable<String, List<String>> peers = new Hashtable<String, List<String>>();
@@ -83,9 +87,61 @@ public class Network implements Runnable {
           throw new Exception("Todos los nodos <" + target + "> se desconectaron.");      
         }
         break;
+      case _ROUND_ROBIN_:      
+        
+        Boolean runned = false;        
+        int base = _rr,
+            top = nodes.size();
+        
+        while ( !runned ) {
+          if ( base >= top ) {
+            base = 0;
+          }
+                    
+          for ( int idx=base; idx < top; idx++ ) {
+            String peer = nodes.get(idx);
+            
+            if ( peer.equals( source.getId() ) ) {
+              continue;
+            }
+            
+            try {
+              runFrom(source, peer, task, args);
+              runned = true;
+              _rr = idx + 1;
+              break;
+            } catch(Exception e) {
+              // ...
+            }
+          }
+          
+          if (runned) {
+            break;
+          }
+          
+          runned = true;   
+          base = 0;
+          top = _rr;       
+        }
+        
+        nodes = peers.get(target);
+        if (nodes == null) {
+          throw new Exception("Todos los nodos <" + target + "> se desconectaron.");      
+        }       
+        break;
         
       default:
         throw new Exception("Modo de ejecucion invalido.");
+    }
+  }
+  
+  private synchronized void sockWrite(Socket cli, String data) {
+    try {
+      OutputStream out = cli.getOutputStream();
+      out.write((data + _SPLIT_).getBytes());
+      out.flush();
+    } catch (IOException e) {
+      e.printStackTrace();
     }
   }
   
@@ -101,9 +157,7 @@ public class Network implements Runnable {
         sockets.put(id, cli);
       }   
       
-      BufferedWriter out = new BufferedWriter(new OutputStreamWriter(cli.getOutputStream()));
-      out.write(source.getId() + "@" + task + "@" + String.join("@", args) + "\n");
-      out.flush();      
+      sockWrite(cli, source.getId() + _SEP_ + task + _SEP_ + String.join(_SEP_, args));  
     } catch (Exception e) {
       List<String> nodes = peers.get(types.get(id));
       nodes.remove(id);
@@ -173,8 +227,8 @@ public class Network implements Runnable {
           DatagramPacket pkg = new DatagramPacket(buff, buff.length);
           socket.receive(pkg);
           String msg = new String(pkg.getData()).trim();
-          msg += "@" + pkg.getAddress().getHostAddress();
-          String cmd[] = msg.split("@");
+          msg += _SEP_ + pkg.getAddress().getHostAddress();
+          String cmd[] = msg.split(_SEP_);
           parseBroadcast(cmd);
         }        
       } catch (Exception e) {

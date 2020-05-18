@@ -10,7 +10,7 @@ public class FileSharingNetwork extends Network {
   
   // Event driven
   public void onDiscover(String id, String name, String ip, int port) {
-    //System.out.println("Discover " + name + "<" + id + "> at " + ip + ":" + port);    
+    System.out.println("Discover " + name + "<" + id + "> at " + ip + ":" + port);    
   }
   
 }

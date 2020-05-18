@@ -80,8 +80,12 @@ public class Node implements Runnable {
     if (_task == _RUN_TASK_) {    
       String msg = tasks.remove(0);
       
-      String[] args = msg.split("@");
-      onMessage(args[0], _netw.getTypeOf(args[0]), args[1], Arrays.copyOfRange(args, 2, args.length));
+      try {
+        String[] args = msg.split(Network._SEP_);
+        onMessage(args[0], _netw.getTypeOf(args[0]), args[1], Arrays.copyOfRange(args, 2, args.length));        
+      } catch(Exception e) {
+        System.out.println("ERROR: " + msg);
+      }
     }
     
     if (_task == _TCP_WORKER_) {      
@@ -150,7 +154,7 @@ public class Node implements Runnable {
         
         while (true) {
           byte[] buff;
-          buff = (_netw.getName() + "@BROAD@" + _name + "@" + _id + "@" + _tcp).getBytes();
+          buff = (_netw.getName() + Network._SEP_ + "BROAD" + Network._SEP_ + _name + Network._SEP_ + _id + Network._SEP_ + _tcp).getBytes();
           DatagramPacket pkg = new DatagramPacket(buff, buff.length, InetAddress.getByName("255.255.255.255"), _port);
           pkg.setData(buff);        
           socket.send(pkg);
