@@ -1,6 +1,5 @@
 package bank;
 
-import java.util.Hashtable;
 import java.util.Scanner;
 
 import p2p.Network;
@@ -8,7 +7,8 @@ import p2p.Node;
 
 public class Client extends Node {
   
-  Integer await = 0;
+  Integer delay = 0;
+  Integer ammount = 0;
   
   // ----------------------------------------------------------------------------------------------------
 
@@ -16,8 +16,8 @@ public class Client extends Node {
   public void onMessage(String source, String type, String task, String[] args) {
     
     switch (type) {
-      case "balancer":
-        parseBalancer(source, task, args);
+      case "manager":
+        parseManager(source, task, args);
         break;
         
       default:
@@ -50,8 +50,14 @@ public class Client extends Node {
               continue;
             }
 
-            System.out.println("# Dispara una serie de tareas, indicando cantidad, tiempo entre inicio, y tiempo de resolucion.");
-            System.out.println("> shot <count> <throttlems> <delayms>");
+            System.out.println("# Crea una cuenta bancaria.");
+            System.out.println("> crear");
+            
+            System.out.println("# Deposita en una cuenta bancaria.");
+            System.out.println("> depositar <cuenta> <importe> <delay>");
+            
+            System.out.println("# Retira de una cuenta bancaria.");
+            System.out.println("> retirar <cuenta> <importe> <delay>");
                                     
             System.out.println("# Salir del programa.");
             System.out.println("> exit");
@@ -66,30 +72,25 @@ public class Client extends Node {
             cmd = opts[0];
             break;
                         
-          case "shot":
+          case "crear":
+            if (opts.length != 1) {
+              System.out.println("Sintaxis invalida.");
+              continue;
+            }
+            
+            runIn("manager", "createAccount", new String[] { }, Network._FIRST_);      
+            break;     
+            
+          case "depositar":
             if (opts.length != 4) {
               System.out.println("Sintaxis invalida.");
               continue;
             }
             
-            Integer count = Integer.parseInt(opts[1]),
-                    throttlems = Integer.parseInt(opts[2]),
-                    delayms = Integer.parseInt(opts[3]);
-            
-            await += count;
-            try {
-              System.out.println("Iniciando shotting...");
-              while (count > 0) {
-                String[] args = new String[] { "" + count, "" + delayms };
-                runIn("balancer", "getAccount", args, Network._FIRST_);                
-                Thread.sleep(throttlems);
-                count--;
-              }
-              System.out.println("Shotting finalizado.");
-            } catch(Exception e) {
-              System.out.println(e.getMessage());                 
-            }
-            break;            
+            runIn("manager", "getAccount", new String[] { opts[1] }, Network._FIRST_);
+            ammount = Integer.parseInt(opts[2]);
+            delay = Integer.parseInt(opts[3]);
+            break;          
                         
           default:
             System.out.print("Opcion invalida." + "\n");
@@ -105,18 +106,48 @@ public class Client extends Node {
 
   // ----------------------------------------------------------------------------------------------------
   
-  private void parseBalancer(String source, String task, String[] args) {    
+  private void parseManager(String source, String task, String[] args) {    
     switch (task) {
 
-      case "taskResult":     
-        await--;
-        if (await % 10 == 0) {
-          System.out.println("Tareas pendientes: <" + await + ">\n");         
-        }       
+      case "createAccountSuccess":     
+        System.out.println("Cuenta creada: <" + args[0] + ">\n"); 
+        break; 
+        
+      case "writeAccountSuccess":     
+        System.out.println("Cuenta guardada: <" + args[0] + ">\n"); 
+        break; 
+        
+      case "writeAccountError":     
+        System.out.println("La cuenta no se guardo: <" + args[0] + ">\n"); 
+        break; 
+        
+      case "getAccountSuccess":  
+        try {  
+          System.out.println("Cuenta obtenida: <" + args[0] + "> <$" + args[1] + "> [" + args[2] + "]\n");
+          ammount += Integer.parseInt(args[1]);          
+          runIn("manager", "writeAccount", new String[] { args[0], ammount.toString(), args[2] }, Network._FIRST_); 
+          System.out.println("Esperando <" + delay + "s>\n");
+          Thread.sleep(delay * 1000);
+          runIn("manager", "leaveAccount", new String[] { args[0], args[2] }, Network._FIRST_);
+        } catch (Exception e) {
+          e.printStackTrace();
+        }   
+        break; 
+        
+      case "leaveAccountSuccess":     
+        System.out.println("Cuenta liberada.\n"); 
+        break; 
+        
+      case "leaveAccountError":     
+        System.out.println("La cuenta no pudo ser liberada.\n"); 
+        break; 
+        
+      case "getAccountError":     
+        System.out.println("La cuenta no se pudo obtener: <" + args[0] + ">\n"); 
         break; 
         
       default:
-        System.out.println("[ERROR] La tarea solicitada (" + task + ") no es valida para peers <balancer>.");
+        System.out.println("[ERROR] La tarea solicitada (" + task + ") no es valida para peers <manager>.");
         break; 
         
     }

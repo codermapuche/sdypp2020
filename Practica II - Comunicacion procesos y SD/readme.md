@@ -77,7 +77,7 @@ No hay mucho mas en el master mas alla de algun detalle minimo del protocolo de 
 
 Dado que este desarrollo servira como base para el punto 3, se propone considerarlo como base para una propuesta de TP final.
 
-#2 Proceso de depositos/extracciones en banco.
+## Proceso de depositos/extracciones en banco.
 
 Para desarrollar este punto, se utilizo la base creada anteriormente y los conceptos teoricos vistos en clase, se realizo una ampliacion de los requisitos para ofrecer un proceso de sincronizacion distribuida, implementando un mecanismo de tokens para lograr los bloqueos.
 
@@ -101,7 +101,7 @@ Esta clase hereda de p2p.Node y representa a un cliente del banco.
 Esta clase, admite los comandos "crear", "depositar" y "retirar", los cuales interactuan con los metodos del Management antes mencionados.
 Cabe destacar, que a fines practicos, los comando "depositar" y "retirar" admiten como parametro un delay expresado en segundos, que introducen un delay en la ejecucion intencional, el cual debe ser menor a 30 segundos, que tiene como objetivo demorar la liberacion del token para poder observar en el Management como se crea el token (mediante "status") y dar tiempo a crear otro cliente que quiera modificar la misma cuenta y ver que es rechazado porque la cuenta se encuntra en uso actualmente.
 
-#3 Red elastica de servicios.
+## Red elastica de servicios.
 
 Para desarrollar este punto, se utilizo la base creada anteriormente y los conceptos teoricos vistos en clase, ademas se realizo una mejora en la red p2p permitiendo el mecanismo de ejecucion _ROUND_ROBIN_ con el objetivo de balancear la ejecucion de procesos entre los Workers disponibles.
 Se utilizo como base el paquete p2p antes explicado, y se crearon tres tipos de nodos:
@@ -124,7 +124,7 @@ Esta clase hereda de p2p.Node y representa a un cliente, basicamente admite un u
 
 Para probar este punto, se debe crear una instancia de Balancer y uno o mas Client, luego en cada cliente ejecutar el comando "fire" con los argumentos correspondientes, internamente se hara todo de forma automatica, si se ponen timers lo sufientemente grandes, daran tiempo a ir a la consola del balancer y ejecutar el comando "status" para ver la cantidad de workers y tareas actuales en ejecucion.
 
-#4 Operador de sobel.
+## Operador de sobel.
 
 Para este punto, se utilizo el codigo base del punto anterior haciendo modificaciones particulares, por ejemplo en el cliente se implementaron los metodos "localsobel" y "remotesobel" donde el primero realiza el procesamiento en el cliente y el segundo envia la tarea al balanceador.
 En el balanceador se implemento el mecanismo necesario para fragmentar una tarea de sobel en multiples subtareas y delegarlas a los workers, los cuales siguen funcionando de forma eleastica.
