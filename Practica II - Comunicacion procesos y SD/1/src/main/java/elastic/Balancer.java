@@ -99,6 +99,7 @@ public class Balancer extends Node {
   
   private void addWorker() {
     try {
+      // Get https://misitio.com/addworker
       String javaHome  = System.getProperty("java.home");
       String javaBin   = javaHome + File.separator + "bin" + File.separator + "java";
       String classpath = System.getProperty("java.class.path");
@@ -143,15 +144,15 @@ public class Balancer extends Node {
     }
     
     if (_load > LVL_CARGA_NORMAL) {
-      needed = 4;            
+      needed = 2;            
     }
     
     if (_load > LVL_CARGA_ALERTA) {
-      needed = 6;            
+      needed = 4;            
     }
     
     if (_load > LVL_CARGA_CRITICO) {
-      needed = 12;                        
+      needed = 6 + Math.round(_load / 500);                        
     }
     
     return needed;

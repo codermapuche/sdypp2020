@@ -25,13 +25,13 @@ public class Balancer extends Node {
   private Hashtable<Integer, Hashtable<Integer, Integer[]>> sobels = new Hashtable<Integer, Hashtable<Integer, Integer[]>>();
   
   private final int _RETRY_TIMER_ = 10000;
-  
+
   private final int LVL_CARGA_VACIO = 0;
   private final int LVL_CARGA_NORMAL = 5;
   private final int LVL_CARGA_ALERTA = 10;
   private final int LVL_CARGA_CRITICO = 20;
   
-  private final int SQUARE_SIZE = 100;
+  private final int SQUARE_SIZE = 300;
   
   private int _id = 0;
   private int _load = 0;
@@ -142,16 +142,18 @@ public class Balancer extends Node {
     }
     
     if (_load > LVL_CARGA_NORMAL) {
-      needed = 4;            
+      needed = 2;            
     }
     
     if (_load > LVL_CARGA_ALERTA) {
-      needed = 6;            
+      needed = 4;            
     }
     
     if (_load > LVL_CARGA_CRITICO) {
-      needed = 12;                        
+      needed = 6 + Math.round(_load / 500);                        
     }
+    
+    System.out.println("Needed: " + needed);
     
     return needed;
   }
@@ -218,6 +220,7 @@ public class Balancer extends Node {
   
   private synchronized void setupWorkers() {
     int needed = getNeeded();
+    System.out.println("[NEEDED] La tarea necesita (" + needed + " workers).");
     
     while(_workers > needed) {  
       try {

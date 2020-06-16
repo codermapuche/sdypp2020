@@ -134,7 +134,7 @@ public class Manager extends Node {
         leave = tokens.get(acc);
         
         if (leave == null || token > leave) {
-          token += 1000 * 30; // 30 seconds
+          token += 1000 * 90; // 90 seconds
           tokens.put(acc, token);
           try {
             runIn(source, "getAccountSuccess", new String[] { 

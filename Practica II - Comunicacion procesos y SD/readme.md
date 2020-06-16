@@ -79,7 +79,7 @@ Dado que este desarrollo servira como base para el punto 3, se propone considera
 
 ## Proceso de depositos/extracciones en banco.
 
-Para desarrollar este punto, se utilizo la base creada anteriormente y los conceptos teoricos vistos en clase, se realizo una ampliacion de los requisitos para ofrecer un proceso de sincronizacion distribuida, implementando un mecanismo de tokens para lograr los bloqueos.
+Para desarrollar este punto, se utilizo la base creada anteriormente y los conceptos teoricos vistos en clase, se realizo una ampliacion de los requisitos para ofrecer un proceso de sincronizacion, implementando un mecanismo de tokens para lograr los bloqueos.
 
 Se utilizo como base el paquete p2p antes explicado, y se crearon dos tipos de nodos:
 
@@ -100,6 +100,7 @@ Esta clase hereda de p2p.Node y representa a un cliente del banco.
 
 Esta clase, admite los comandos "crear", "depositar" y "retirar", los cuales interactuan con los metodos del Management antes mencionados.
 Cabe destacar, que a fines practicos, los comando "depositar" y "retirar" admiten como parametro un delay expresado en segundos, que introducen un delay en la ejecucion intencional, el cual debe ser menor a 30 segundos, que tiene como objetivo demorar la liberacion del token para poder observar en el Management como se crea el token (mediante "status") y dar tiempo a crear otro cliente que quiera modificar la misma cuenta y ver que es rechazado porque la cuenta se encuntra en uso actualmente.
+El cliente valida a la hora de retirar que el saldo sea mayor a cero.
 
 ## Red elastica de servicios.
 

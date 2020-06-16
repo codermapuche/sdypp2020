@@ -84,7 +84,7 @@ public class Node implements Runnable {
         String[] args = msg.split(Network._SEP_);
         onMessage(args[0], _netw.getTypeOf(args[0]), args[1], Arrays.copyOfRange(args, 2, args.length));        
       } catch(Exception e) {
-        System.out.println("ERROR: " + msg);
+        //System.out.println("ERROR: " + msg);
       }
     }
     

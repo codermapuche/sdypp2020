@@ -36,7 +36,7 @@ public class Worker extends Node {
       case "leave":
         _leave = true;
         if (load == 0) {  
-          System.exit(0);           
+          System.exit(0);
         }
         break; 
         

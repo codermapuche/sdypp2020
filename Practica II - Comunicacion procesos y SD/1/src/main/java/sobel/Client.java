@@ -83,10 +83,7 @@ public class Client extends Node {
               System.out.println("Sintaxis invalida.");
               continue;
             }
-            
-            opts[1] = "C:\\Users\\Nehuen\\Pictures\\bg.jpg";
-            opts[2] = "C:\\Users\\Nehuen\\Pictures\\sobel.jpg";
-            
+                        
             startTime = System.nanoTime();
             System.out.println("Loading Image...");
             imgIn = ImageIO.read(new File(opts[1]));

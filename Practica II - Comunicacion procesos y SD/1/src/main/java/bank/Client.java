@@ -90,6 +90,17 @@ public class Client extends Node {
             runIn("manager", "getAccount", new String[] { opts[1] }, Network._FIRST_);
             ammount = Integer.parseInt(opts[2]);
             delay = Integer.parseInt(opts[3]);
+            break;  
+            
+          case "retirar":
+            if (opts.length != 4) {
+              System.out.println("Sintaxis invalida.");
+              continue;
+            }
+            
+            runIn("manager", "getAccount", new String[] { opts[1] }, Network._FIRST_);
+            ammount = Integer.parseInt(opts[2]) * -1;
+            delay = Integer.parseInt(opts[3]);
             break;          
                         
           default:
@@ -124,11 +135,16 @@ public class Client extends Node {
       case "getAccountSuccess":  
         try {  
           System.out.println("Cuenta obtenida: <" + args[0] + "> <$" + args[1] + "> [" + args[2] + "]\n");
-          ammount += Integer.parseInt(args[1]);          
-          runIn("manager", "writeAccount", new String[] { args[0], ammount.toString(), args[2] }, Network._FIRST_); 
-          System.out.println("Esperando <" + delay + "s>\n");
-          Thread.sleep(delay * 1000);
-          runIn("manager", "leaveAccount", new String[] { args[0], args[2] }, Network._FIRST_);
+          ammount += Integer.parseInt(args[1]);   
+          if (ammount < 0) {
+            System.out.println("El saldo es menor a 0.\n");
+            runIn("manager", "leaveAccount", new String[] { args[0], args[2] }, Network._FIRST_);            
+          } else {
+            runIn("manager", "writeAccount", new String[] { args[0], ammount.toString(), args[2] }, Network._FIRST_); 
+            System.out.println("Esperando <" + delay + "s>\n");
+            Thread.sleep(delay * 1000);
+            runIn("manager", "leaveAccount", new String[] { args[0], args[2] }, Network._FIRST_);            
+          }
         } catch (Exception e) {
           e.printStackTrace();
         }   
